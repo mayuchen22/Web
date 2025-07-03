@@ -30,6 +30,62 @@ const TicketUI = {
     },
 
     /**
+     * @param {string} message - 要显示的警告消息
+     * @param {HTMLElement|null} ticketItem - 票据项元素
+     * @description 显示自定义警告对话框。
+     */
+    showMyAlert: function (message, ticketItem) {
+        // 如果没有传入票据项，则不进行任何操作
+        if (!ticketItem) {
+            return;
+        }
+
+        // 显示自定义警告对话框
+        const alertBox = document.getElementById('customAlert');
+        const alertMessage = document.getElementById('alertMessage');
+        if (alertBox && alertMessage) {
+            alertMessage.textContent = message;
+            alertBox.classList.remove('hidden');
+        }
+
+        // 添加关闭按钮事件监听
+        const closeAlertButton = document.getElementById('closeAlert');
+        if (closeAlertButton) {
+            const closeHandler = this.hideMyAlert.bind(this, ticketItem);
+            closeAlertButton.addEventListener('click', closeHandler);
+
+            // 记录事件监听器，便于后续移除
+            closeAlertButton._closeHandler = closeHandler;
+        }
+
+    },
+
+    /**
+     * @param {HTMLElement} ticketItem - 票据项元素
+     * @description 关闭自定义警告对话框。
+     */
+    hideMyAlert: function (ticketItem) {
+        // 关闭自定义警告对话框
+        const alertBox = document.getElementById('customAlert');
+        if (alertBox) {
+            alertBox.classList.add('hidden');
+        }
+
+        // 移除对应的票据项
+        if (ticketItem) {
+            ticketItem.remove();
+        }
+
+        // 移除按钮事件监听
+        const closeAlertButton = document.getElementById('closeAlert');
+        if (closeAlertButton && closeAlertButton._closeHandler) {
+            closeAlertButton.removeEventListener('click', closeAlertButton._closeHandler);
+            delete closeAlertButton._closeHandler; // 清除记录的事件监听器
+            console.log('移除了关闭按钮事件监听');
+        }
+    },
+
+    /**
      * @param {Ticket} ticket - 票据对象
      * @description 渲染单张电影票到页面。
      */
@@ -57,17 +113,18 @@ const TicketUI = {
 // 事件处理模块
 const TicketEvents = {
     /**
+     * @param {Event} event - 事件对象
      * @description 处理退票按钮点击事件。
      */
     onRefundClick: function (event) {
-        if (event.target.classList.contains('refund-btn')) {
+        if (event.target.classList.contains('refund-btn')) { // 检查是否点击了退票按钮
             const ticketItem = event.target.closest('.ticket-item');
             if (ticketItem) {
-                // ticketItem.remove();
-                TicketUI.showAlert('退票成功！');
+                TicketUI.showMyAlert('退票成功！', ticketItem);
             }
         }
-    }
+
+    },
 };
 
 // 初始化模块
@@ -80,6 +137,7 @@ const TicketWeb = {
         if (ticketList) {
             ticketList.addEventListener('click', TicketEvents.onRefundClick);
         }
+
 
         // // 示例：添加一张电影票
         // const sampleTicket = new Ticket('示例电影', '2025年7月10日 19:00', ['A10', 'A11'], 'unpaid');
