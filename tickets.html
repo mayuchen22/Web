@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>票夹 - 电影院选座系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./tickets.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-ticket-alt"></i> 我的票夹</h1>
+            <p class="subtitle">查看和管理您的电影票</p>
+            <div class="header-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+        </header>
+
+        <div class="content">
+            <section class="ticket-section">
+                <h2 class="section-title"><i class="fas fa-ticket-alt"></i> 已购电影票</h2>
+                <div class="ticket-list">
+                    <!-- 动态渲染电影票 -->
+                    <div class="ticket-item">
+                        <div class="ticket-info">
+                            <h3>电影名称: 《示例电影》</h3>
+                            <p>放映时间: 2025年7月10日 19:00</p>
+                            <p>座位: A10, A11</p>
+                        </div>
+                        <button class="btn-danger refund-btn">
+                            <i class="fas fa-undo"></i> 退票
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rules-section">
+                <h2 class="section-title"><i class="fas fa-info-circle"></i> 票夹规则说明</h2>
+                <ul>
+                    <li>电影票不可转让，仅限本人使用。</li>
+                    <li>退票需在电影开场前至少24小时申请。</li>
+                    <li>退票成功后，金额将原路退回。</li>
+                </ul>
+            </section>
+        </div>
+
+        <footer>
+            <p>清华大学软件学院 © 2025 | 《Web前端技术实训》大作业 | 电影院选座系统</p>
+            <p>仅用于教学目的，请勿外传</p>
+        </footer>
+    </div>
+</body>
+
+</html>
