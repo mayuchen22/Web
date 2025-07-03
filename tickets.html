@@ -24,11 +24,26 @@
                 <h2 class="section-title"><i class="fas fa-ticket-alt"></i> 已购电影票</h2>
                 <div class="ticket-list">
                     <!-- 动态渲染电影票 -->
-                    <div class="ticket-item">
+                    <div class="ticket-item" id="film-ticket1">
                         <div class="ticket-info">
                             <h3>电影名称: 《示例电影》</h3>
                             <p>放映时间: 2025年7月10日 19:00</p>
                             <p>座位: A10, A11</p>
+                            <p class="ticket-status status-unpaid" data-status="unpaid">状态: 未付款</p>
+                        </div>
+                        <button class="btn-danger cancel-btn">
+                            <i class="fas fa-window-close"></i> 取消预定
+                        </button>
+                        <!-- <button class="btn-danger refund-btn">
+                            <i class="fas fa-undo"></i> 退票
+                        </button> -->
+                    </div>
+                    <div class="ticket-item" id="film-ticket2">
+                        <div class="ticket-info">
+                            <h3>电影名称: 《示例电影2》</h3>
+                            <p>放映时间: 2025年7月11日 23:00</p>
+                            <p>座位: A10, A11</p>
+                            <p class="ticket-status status-paid" data-status="paid">状态: 已付款</p>
                         </div>
                         <button class="btn-danger refund-btn">
                             <i class="fas fa-undo"></i> 退票

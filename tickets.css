@@ -123,6 +123,18 @@ h1 {
     margin-bottom: 5px;
 }
 
+.ticket-info .ticket-status {
+    font-weight: 600;
+}
+
+.ticket-info .status-paid {
+    color: #28a745;
+}
+
+.ticket-info .status-unpaid {
+    color: #ff8f07;
+}
+
 .refund-btn {
     background: #dc3545;
     color: white;
@@ -140,6 +152,27 @@ h1 {
 
 .refund-btn:hover {
     background: #bd2130;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-btn {
+    background: #f29e0cde;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 0.95rem;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cancel-btn:hover {
+    background: #d88c0b;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
