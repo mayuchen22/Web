@@ -7,6 +7,7 @@
     <title>票夹 - 电影院选座系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./tickets.css">
+    <script src="./tickets.js"></script>
 </head>
 
 <body>
@@ -22,7 +23,7 @@
         <div class="content">
             <section class="ticket-section">
                 <h2 class="section-title"><i class="fas fa-ticket-alt"></i> 已购电影票</h2>
-                <div class="ticket-list">
+                <div class="ticket-list" id="ticketList">
                     <!-- 动态渲染电影票 -->
                     <div class="ticket-item" id="film-ticket1">
                         <div class="ticket-info">
