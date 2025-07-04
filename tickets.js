@@ -34,7 +34,7 @@ const TicketUI = {
      * @param {HTMLElement|null} ticketItem - 票据项元素
      * @description 显示自定义警告对话框。
      */
-    showMyAlert: function (message, ticketItem) {
+    showMyAlert: function (message, ticketItem = null) {
         // 如果没有传入票据项，则不进行任何操作
         if (!ticketItem) {
             return;
@@ -123,7 +123,6 @@ const TicketEvents = {
                 TicketUI.showMyAlert('退票成功！', ticketItem);
             }
         }
-
     },
 };
 
