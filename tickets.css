@@ -204,6 +204,11 @@ h1 {
     color: #ff8f07;
 }
 
+.btn-box {
+    display: flex;
+    gap: 10px;
+}
+
 .refund-btn {
     background: #dc3545;
     color: white;
@@ -242,6 +247,48 @@ h1 {
 
 .cancel-btn:hover {
     background: #d88c0b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pay-btn {
+    background: #007bff;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 0.95rem;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pay-btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-btn {
+    background: #17a2b8;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 0.95rem;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-btn:hover {
+    background: #138496;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
