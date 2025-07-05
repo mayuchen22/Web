@@ -88,6 +88,7 @@ const TicketUI = {
     /**
      * @param {Ticket} ticket - 票据对象
      * @description 渲染单张电影票到页面。
+     * todo: 添加票据
      */
     renderTicket: function (ticket) {
         const ticketList = document.getElementById('ticketList');
@@ -107,11 +108,60 @@ const TicketUI = {
             `;
             ticketList.appendChild(ticketItem);
         }
-    }
+    },
+
+    /**
+     * @param {HTMLElement} ticketItem - 票据项元素
+     * @description 显示票据详情弹窗。
+     */
+    showTicketDetail: function (ticketItem) {
+        if (!ticketItem) return;
+        const modal = document.getElementById('ticketDetailModal');
+        const content = document.getElementById('ticketDetailContent');
+        if (modal && content) {
+            // 获取票据信息
+            const movieName = ticketItem.querySelector('h3')?.textContent || '';
+            const showTime = ticketItem.querySelector('p:nth-of-type(2)')?.textContent || '';
+            const seats = ticketItem.querySelector('p:nth-of-type(3)')?.textContent || '';
+            const status = ticketItem.querySelector('.ticket-status')?.textContent || '';
+            // 填充内容
+            content.innerHTML = `
+                <div><strong>${movieName}</strong></div>
+                <div>${showTime}</div>
+                <div>${seats}</div>
+                <div>${status}</div>
+            `;
+            modal.classList.remove('hidden');
+        }
+        // 绑定关闭按钮
+        const closeBtn = document.getElementById('closeDetailModal');
+        if (closeBtn) {
+            const closeHandler = function () {
+                modal.classList.add('hidden');
+                content.innerHTML = '';
+                closeBtn.removeEventListener('click', closeHandler);
+            };
+            closeBtn.addEventListener('click', closeHandler);
+        }
+    },
 };
 
 // 事件处理模块
 const TicketEvents = {
+    /**
+     * @param {Event} event - 事件对象
+     * @description 处理info按钮点击事件，展示详情弹窗。
+     */
+    onInfoClick: function (event) {
+        if (event.target.classList.contains('info-btn') || (event.target.closest && event.target.closest('.info-btn'))) {
+            const btn = event.target.classList.contains('info-btn') ? event.target : event.target.closest('.info-btn');
+            const ticketItem = btn.closest('.ticket-item');
+            if (ticketItem) {
+                TicketUI.showTicketDetail(ticketItem);
+            }
+        }
+    },
+
     /**
      * @param {Event} event - 事件对象
      * @description 处理退票按钮点击事件。
@@ -135,6 +185,7 @@ const TicketWeb = {
         const ticketList = document.getElementById('ticketList');
         if (ticketList) {
             ticketList.addEventListener('click', TicketEvents.onRefundClick);
+            ticketList.addEventListener('click', TicketEvents.onInfoClick);
         }
 
 

@@ -11,10 +11,22 @@
 </head>
 
 <body>
+    <!-- 自定义警告弹窗 -->
     <div id="customAlert" class="custom-alert hidden">
         <div class="alert-content">
             <p id="alertMessage">警告消息！</p>
             <button id="closeAlert" class="btn-secondary">关闭</button>
+        </div>
+    </div>
+
+    <!-- 票据详情弹窗 -->
+    <div id="ticketDetailModal" class="custom-alert hidden">
+        <div class="alert-content">
+            <h3 style="margin-bottom: 15px;">票据详情</h3>
+            <div id="ticketDetailContent">
+                <!-- 票据详细信息内容由JS动态填充 -->
+            </div>
+            <button id="closeDetailModal" class="btn-secondary" style="margin-top: 20px;">关闭</button>
         </div>
     </div>
 
