@@ -100,11 +100,25 @@ const TicketUI = {
                     <h3>电影名称: ${ticket.movieName}</h3>
                     <p>放映时间: ${ticket.showTime}</p>
                     <p>座位: ${ticket.seats.join(', ')}</p>
-                    <p class="ticket-status status-${ticket.status}" data-status="${ticket.status}">状态: ${ticket.status}</p>
+                    <p class="ticket-status status-${ticket.status}" data-status="${ticket.status}">状态: ${ticket.status === 'unpaid' ? '未付款' : '已付款'}</p>
                 </div>
-                <button class="btn-danger refund-btn">
-                    <i class="fas fa-undo"></i> 退票
-                </button>
+                <div class="btn-box">
+                ${ticket.status === 'unpaid' ?
+                    `<button class="btn-primary pay-btn">
+                        <i class="fas fa-credit-card"></i> 去付款
+                    </button>
+                    <button class="btn-danger cancel-btn">
+                        <i class="fas fa-window-close"></i> 取消预定
+                    </button>`
+                    :
+                    `<button class="btn-primary info-btn">
+                        <i class="fas fa-info-circle"></i> 查看详情
+                    </button>
+                    <button class="btn-danger refund-btn">
+                        <i class="fas fa-undo"></i> 退票
+                    </button>`
+                }
+                </div>
             `;
             ticketList.appendChild(ticketItem);
         }
@@ -121,8 +135,8 @@ const TicketUI = {
         if (modal && content) {
             // 获取票据信息
             const movieName = ticketItem.querySelector('h3')?.textContent || '';
-            const showTime = ticketItem.querySelector('p:nth-of-type(2)')?.textContent || '';
-            const seats = ticketItem.querySelector('p:nth-of-type(3)')?.textContent || '';
+            const showTime = ticketItem.querySelector('p:nth-of-type(1)')?.textContent || '';
+            const seats = ticketItem.querySelector('p:nth-of-type(2)')?.textContent || '';
             const status = ticketItem.querySelector('.ticket-status')?.textContent || '';
             // 填充内容
             content.innerHTML = `
@@ -189,9 +203,12 @@ const TicketWeb = {
         }
 
 
-        // // 示例：添加一张电影票
-        // const sampleTicket = new Ticket('示例电影', '2025年7月10日 19:00', ['A10', 'A11'], 'unpaid');
-        // TicketUI.renderTicket(sampleTicket);
+        // 示例：添加电影票
+        const sampleTicket = new Ticket('添加电影1', '2025年7月21日 19:00', ['B1', 'B2'], 'unpaid');
+        TicketUI.renderTicket(sampleTicket);
+
+        const sampleTicket2 = new Ticket('添加电影2', '2025年7月21日 21:00', ['C1', 'C2'], 'paid');
+        TicketUI.renderTicket(sampleTicket2);
     }
 };
 
