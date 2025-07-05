@@ -8,6 +8,31 @@ class Ticket {
     }
 }
 
+// 弹窗动画工具函数
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        console.log(`[showModal] before:`, modal.className);
+        modal.classList.remove('hidden');
+        // 用 requestAnimationFrame 保证浏览器渲染后再加 show，触发动画
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+            console.log(`[showModal] after add show:`, modal.className);
+        });
+    }
+}
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        console.log(`[hideModal] before:`, modal.className);
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            console.log(`[hideModal] after add hidden:`, modal.className);
+        }, 300);
+    }
+}
+
 // UI 操作模块
 const TicketUI = {
     /**
@@ -45,7 +70,7 @@ const TicketUI = {
         const alertMessage = document.getElementById('alertMessage');
         if (alertBox && alertMessage) {
             alertMessage.textContent = message;
-            alertBox.classList.remove('hidden');
+            showModal('customAlert');
         }
 
         // 添加关闭按钮事件监听
@@ -57,7 +82,6 @@ const TicketUI = {
             // 记录事件监听器，便于后续移除
             closeAlertButton._closeHandler = closeHandler;
         }
-
     },
 
     /**
@@ -65,24 +89,38 @@ const TicketUI = {
      * @description 关闭自定义警告对话框。
      */
     hideMyAlert: function (ticketItem) {
-        // 关闭自定义警告对话框
-        const alertBox = document.getElementById('customAlert');
-        if (alertBox) {
-            alertBox.classList.add('hidden');
-        }
+        hideModal('customAlert');
+        // // 关闭自定义警告对话框
+        // const alertBox = document.getElementById('customAlert');
+        // if (alertBox) {
+        //     alertBox.classList.add('hidden');
+        // }
 
-        // 移除对应的票据项
-        if (ticketItem) {
-            ticketItem.remove();
-        }
+        // // 移除对应的票据项
+        // if (ticketItem) {
+        //     ticketItem.remove();
+        // }
 
-        // 移除按钮事件监听
-        const closeAlertButton = document.getElementById('closeAlert');
-        if (closeAlertButton && closeAlertButton._closeHandler) {
-            closeAlertButton.removeEventListener('click', closeAlertButton._closeHandler);
-            delete closeAlertButton._closeHandler; // 清除记录的事件监听器
-            console.log('移除了关闭按钮事件监听');
-        }
+        // // 移除按钮事件监听
+        // const closeAlertButton = document.getElementById('closeAlert');
+        // if (closeAlertButton && closeAlertButton._closeHandler) {
+        //     closeAlertButton.removeEventListener('click', closeAlertButton._closeHandler);
+        //     delete closeAlertButton._closeHandler; // 清除记录的事件监听器
+        //     console.log('移除了关闭按钮事件监听');
+        // }
+        setTimeout(() => {
+            // 动画结束后再移除票据项
+            if (ticketItem) {
+                ticketItem.remove();
+            }
+            // 解绑关闭按钮事件
+            const closeAlertButton = document.getElementById('closeAlert');
+            if (closeAlertButton && closeAlertButton._closeHandler) {
+                closeAlertButton.removeEventListener('click', closeAlertButton._closeHandler);
+                delete closeAlertButton._closeHandler;
+                console.log('移除了关闭按钮事件监听');
+            }
+        }, 300);
     },
 
     /**
@@ -145,13 +183,13 @@ const TicketUI = {
                 <div>${seats}</div>
                 <div>${status}</div>
             `;
-            modal.classList.remove('hidden');
+            showModal('ticketDetailModal');
         }
         // 绑定关闭按钮
         const closeBtn = document.getElementById('closeDetailModal');
         if (closeBtn) {
             const closeHandler = function () {
-                modal.classList.add('hidden');
+                hideModal('ticketDetailModal');
                 content.innerHTML = '';
                 closeBtn.removeEventListener('click', closeHandler);
             };
@@ -216,3 +254,5 @@ const TicketWeb = {
 document.addEventListener('DOMContentLoaded', function () {
     TicketWeb.init();
 });
+
+
