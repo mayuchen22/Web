@@ -196,6 +196,50 @@ const TicketUI = {
             closeBtn.addEventListener('click', closeHandler);
         }
     },
+
+    /**
+     * @param {HTMLElement} ticketItem - 票据项元素
+     * @description 显示退票确认弹窗。
+     */
+    showRefundConfirm: function (ticketItem) {
+        if (!ticketItem) return;
+        const modal = document.getElementById('confirmRefundModal');
+        const content = document.getElementById('confirmRefundContent');
+        if (modal && content) {
+            // 复用详情内容
+            const movieName = ticketItem.querySelector('h3')?.textContent || '';
+            const showTime = ticketItem.querySelector('p:nth-of-type(1)')?.textContent || '';
+            const seats = ticketItem.querySelector('p:nth-of-type(2)')?.textContent || '';
+            const status = ticketItem.querySelector('.ticket-status')?.textContent || '';
+            content.innerHTML = `
+                <div><strong>${movieName}</strong></div>
+                <div>${showTime}</div>
+                <div>${seats}</div>
+            `;
+            showModal('confirmRefundModal');
+        }
+        // 绑定按钮事件
+        const confirmBtn = document.getElementById('confirmRefundBtn');
+        const cancelBtn = document.getElementById('cancelRefundBtn');
+        // 先解绑，防止多次绑定
+        if (confirmBtn._handler) confirmBtn.removeEventListener('click', confirmBtn._handler);
+        if (cancelBtn._handler) cancelBtn.removeEventListener('click', cancelBtn._handler);
+        // 确认退票
+        const confirmHandler = () => {
+            hideModal('confirmRefundModal');
+            setTimeout(() => {
+                TicketUI.showMyAlert('退票成功！', ticketItem);
+            }, 300);
+        };
+        // 取消退票
+        const cancelHandler = () => {
+            hideModal('confirmRefundModal');
+        };
+        confirmBtn.addEventListener('click', confirmHandler);
+        cancelBtn.addEventListener('click', cancelHandler);
+        confirmBtn._handler = confirmHandler;
+        cancelBtn._handler = cancelHandler;
+    },
 };
 
 // 事件处理模块
@@ -222,7 +266,7 @@ const TicketEvents = {
         if (event.target.classList.contains('refund-btn')) { // 检查是否点击了退票按钮
             const ticketItem = event.target.closest('.ticket-item');
             if (ticketItem) {
-                TicketUI.showMyAlert('退票成功！', ticketItem);
+                TicketUI.showRefundConfirm(ticketItem);
             }
         }
     },

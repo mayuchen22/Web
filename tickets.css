@@ -124,6 +124,49 @@ body {
     overflow: hidden;
 }
 
+.confirm-tip {
+    font-size: 1.2rem;
+    color: #e50a0a;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+/* 确认退票按钮 */
+.confirm-refund-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.confirm-refund-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 取消退票按钮 */
+.cancel-refund-btn {
+    background: #676767;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.cancel-refund-btn:hover {
+    background: #565656;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 header {
     background: linear-gradient(to right, #4a6fa5, #6b8cce);
     color: white;
@@ -166,6 +209,10 @@ h1 {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.btn-back:hover {
+    background: #333333;
 }
 
 .content {

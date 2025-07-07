@@ -30,6 +30,20 @@
         </div>
     </div>
 
+    <!-- 退票确认弹窗 -->
+    <div id="confirmRefundModal" class="custom-alert hidden">
+        <div class="alert-content">
+            <h3 style="margin-bottom: 15px;" class="confirm-tip">您确定要退票吗？</h3>
+            <div id="confirmRefundContent">
+                <!-- 票据详细信息内容由JS动态填充 -->
+            </div>
+            <div style="display: flex; justify-content: center; gap: 18px; margin-top: 20px;">
+                <button id="confirmRefundBtn" class="btn-danger confirm-refund-btn">确认退票</button>
+                <button id="cancelRefundBtn" class="btn-secondary cancel-refund-btn">取消退票</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1><i class="fas fa-ticket-alt"></i> 我的票夹</h1>
