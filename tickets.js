@@ -17,11 +17,11 @@ const Utils = {
     showModal: function (modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
-            console.log(`[showModal] before:`, modal.className);
+            // console.log(`[showModal] before:`, modal.className);
             modal.classList.remove('hidden');
             requestAnimationFrame(() => {
                 modal.classList.add('show');
-                console.log(`[showModal] after add show:`, modal.className);
+                // console.log(`[showModal] after add show:`, modal.className);
             });
         }
     },
@@ -33,11 +33,11 @@ const Utils = {
     hideModal: function (modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
-            console.log(`[hideModal] before:`, modal.className);
+            // console.log(`[hideModal] before:`, modal.className);
             modal.classList.remove('show');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                console.log(`[hideModal] after add hidden:`, modal.className);
+                // console.log(`[hideModal] after add hidden:`, modal.className);
             }, 300);
         }
     },
@@ -48,7 +48,6 @@ const Utils = {
      * @description 将日期字符串转换为 Date 对象。
      */
     convertDate: function (pDateString) {
-
         const text = pDateString.innerText || '';
         const matchRegex = /(\d{4})年(\d{1,2})月(\d{1,2})日\s+(\d{1,2}):(\d{1,2})/;
         const match = text.match(matchRegex);
@@ -199,12 +198,12 @@ const TicketUI = {
                 <div>${seats}</div>
             `;
             btnBox.innerHTML = `<button id="closeDetailModal" class="btn-secondary">关闭</button>`;
-            showModal('ticketDetailModal');
+            Utils.showModal('ticketDetailModal');
             // 绑定关闭按钮
             const closeBtn = document.getElementById('closeDetailModal');
             if (closeBtn) {
                 const closeHandler = function () {
-                    hideModal('ticketDetailModal');
+                    Utils.hideModal('ticketDetailModal');
                     content.innerHTML = '';
                     btnBox.innerHTML = '';
                     closeBtn.removeEventListener('click', closeHandler);
@@ -242,6 +241,19 @@ const TicketUI = {
                 <button id="closeDetailModal" class="btn-secondary">关闭</button>
             `;
             Utils.showModal('ticketDetailModal');
+            // 绑定去付款按钮
+            const payBtn = document.getElementById('payModalPayBtn');
+            if (payBtn) {
+                const payHandler = function () {
+                    Utils.hideModal('ticketDetailModal');
+                    setTimeout(() => {
+                        // 弹出付款成功提示框
+                        TicketUI.showPaySuccessAlert(ticketItem);
+                    }, 300);
+                    payBtn.removeEventListener('click', payHandler);
+                };
+                payBtn.addEventListener('click', payHandler);
+            }
         }
         // 绑定关闭按钮
         const closeBtn = document.getElementById('closeDetailModal');
@@ -388,7 +400,32 @@ const TicketUI = {
         // 重新渲染
         ticketList.innerHTML = '';
         sortedTickets.forEach(ticket => ticketList.appendChild(ticket));
-    }
+    },
+
+    /**
+     * @param {HTMLElement} ticketItem - 票据项元素
+     * @description 显示付款成功提示框，关闭时转为已付款状态。
+     */
+    showPaySuccessAlert: function (ticketItem) {
+        const modal = document.getElementById('customAlert');
+        const alertMessage = document.getElementById('alertMessage');
+        if (modal && alertMessage) {
+            alertMessage.textContent = '付款成功！';
+            Utils.showModal('customAlert');
+        }
+        // 绑定关闭按钮
+        const closeAlertButton = document.getElementById('closeAlert');
+        if (closeAlertButton) {
+            const closeHandler = function () {
+                Utils.hideModal('customAlert');
+                setTimeout(() => {
+                    TicketUI.convertToPaidTicketItem(ticketItem);
+                }, 300);
+                closeAlertButton.removeEventListener('click', closeHandler);
+            };
+            closeAlertButton.addEventListener('click', closeHandler);
+        }
+    },
 };
 
 // 事件处理模块
