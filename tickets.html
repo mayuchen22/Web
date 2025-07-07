@@ -45,6 +45,20 @@
         </div>
     </div>
 
+    <!-- 取消预订确认弹窗 -->
+    <div id="confirmCancelModal" class="custom-alert hidden">
+        <div class="alert-content">
+            <h3 style="margin-bottom: 15px;" class="confirm-tip">您确定要取消预订吗？</h3>
+            <div id="confirmCancelContent">
+                <!-- 票据详细信息内容由JS动态填充 -->
+            </div>
+            <div style="display: flex; justify-content: center; gap: 18px; margin-top: 20px;">
+                <button id="confirmCancelBtn" class="btn-danger confirm-cancel-btn">确认取消</button>
+                <button id="cancelCancelBtn" class="btn-secondary cancel-cancel-btn">返回</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1><i class="fas fa-ticket-alt"></i> 我的票夹</h1>
