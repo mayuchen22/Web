@@ -169,31 +169,77 @@ const TicketUI = {
     showTicketDetail: function (ticketItem) {
         if (!ticketItem) return;
         const modal = document.getElementById('ticketDetailModal');
+        const title = document.getElementById('ticketDetailTitle');
         const content = document.getElementById('ticketDetailContent');
-        if (modal && content) {
+        const btnBox = document.getElementById('ticketDetailBtnBox');
+        if (modal && content && title && btnBox) {
             // 获取票据信息
             const movieName = ticketItem.querySelector('h3')?.textContent || '';
             const showTime = ticketItem.querySelector('p:nth-of-type(1)')?.textContent || '';
             const seats = ticketItem.querySelector('p:nth-of-type(2)')?.textContent || '';
             const status = ticketItem.querySelector('.ticket-status')?.textContent || '';
             // 填充内容
+            title.textContent = '票据详情';
             content.innerHTML = `
                 <div><strong>${movieName}</strong></div>
                 <div>${showTime}</div>
                 <div>${seats}</div>
-                <div>${status}</div>
+            `;
+            btnBox.innerHTML = `<button id="closeDetailModal" class="btn-secondary">关闭</button>`;
+            showModal('ticketDetailModal');
+            // 绑定关闭按钮
+            const closeBtn = document.getElementById('closeDetailModal');
+            if (closeBtn) {
+                const closeHandler = function () {
+                    hideModal('ticketDetailModal');
+                    content.innerHTML = '';
+                    btnBox.innerHTML = '';
+                    closeBtn.removeEventListener('click', closeHandler);
+                };
+                closeBtn.addEventListener('click', closeHandler);
+            }
+        }
+    },
+
+    /**
+     * @param {HTMLElement} ticketItem - 票据项元素
+     * @description 显示付款弹窗，复用详情弹窗结构，仅标题和按钮不同。
+     */
+    showPayModal: function (ticketItem) {
+        if (!ticketItem) return;
+        const modal = document.getElementById('ticketDetailModal');
+        const title = document.getElementById('ticketDetailTitle');
+        const content = document.getElementById('ticketDetailContent');
+        const btnBox = document.getElementById('ticketDetailBtnBox');
+        if (modal && content && title && btnBox) {
+            // 获取票据信息
+            const movieName = ticketItem.querySelector('h3')?.textContent || '';
+            const showTime = ticketItem.querySelector('p:nth-of-type(1)')?.textContent || '';
+            const seats = ticketItem.querySelector('p:nth-of-type(2)')?.textContent || '';
+            const status = ticketItem.querySelector('.ticket-status')?.textContent || '';
+            // 填充内容
+            title.textContent = '确认付款';
+            content.innerHTML = `
+                <div><strong>${movieName}</strong></div>
+                <div>${showTime}</div>
+                <div>${seats}</div>
+            `;
+            btnBox.innerHTML = `
+                <button id="payModalPayBtn" class="btn-primary topay-btn">去付款</button>
+                <button id="closeDetailModal" class="btn-secondary">关闭</button>
             `;
             showModal('ticketDetailModal');
-        }
-        // 绑定关闭按钮
-        const closeBtn = document.getElementById('closeDetailModal');
-        if (closeBtn) {
-            const closeHandler = function () {
-                hideModal('ticketDetailModal');
-                content.innerHTML = '';
-                closeBtn.removeEventListener('click', closeHandler);
-            };
-            closeBtn.addEventListener('click', closeHandler);
+            // 绑定关闭按钮
+            const closeBtn = document.getElementById('closeDetailModal');
+            if (closeBtn) {
+                const closeHandler = function () {
+                    hideModal('ticketDetailModal');
+                    content.innerHTML = '';
+                    btnBox.innerHTML = '';
+                    closeBtn.removeEventListener('click', closeHandler);
+                };
+                closeBtn.addEventListener('click', closeHandler);
+            }
         }
     },
 
@@ -270,6 +316,20 @@ const TicketEvents = {
             }
         }
     },
+
+    /**
+     * @param {Event} event - 事件对象
+     * @description 处理去付款按钮点击事件，弹出付款弹窗。
+     */
+    onPayClick: function (event) {
+        if (event.target.classList.contains('pay-btn') || (event.target.closest && event.target.closest('.pay-btn'))) {
+            const btn = event.target.classList.contains('pay-btn') ? event.target : event.target.closest('.pay-btn');
+            const ticketItem = btn.closest('.ticket-item');
+            if (ticketItem) {
+                TicketUI.showPayModal(ticketItem);
+            }
+        }
+    },
 };
 
 // 初始化模块
@@ -282,6 +342,7 @@ const TicketWeb = {
         if (ticketList) {
             ticketList.addEventListener('click', TicketEvents.onRefundClick);
             ticketList.addEventListener('click', TicketEvents.onInfoClick);
+            ticketList.addEventListener('click', TicketEvents.onPayClick);
         }
 
 
