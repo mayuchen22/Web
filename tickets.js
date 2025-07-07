@@ -327,27 +327,22 @@ const TicketUI = {
     },
 
     /**
-     * @param {HTMLElement} tickets - 票据列表元素
+     * @param {HTMLElement} ticketList - 票据列表元素
      * @description 对票据列表进行排序，按放映时间升序排列。
      */
-    sortTickets: function (tickets) {
-
+    sortTickets: function (ticketList) {
+        if (!ticketList) return;
+        // 获取所有票据项
+        const tickets = Array.from(ticketList.querySelectorAll('.ticket-item'));
         // 按放映时间升序排序
-        const sortedTickets = Array.from(tickets).sort((a, b) => {
-            Utils.convertDate(a.querySelector('.ticket-info p:nth-of-type(1)'))
-                - Utils.convertDate(b.querySelector('.ticket-info p:nth-of-type(1)'))
+        const sortedTickets = tickets.sort((a, b) => {
+            return Utils.convertDate(a.querySelector('.ticket-info p:nth-of-type(1)')) -
+                Utils.convertDate(b.querySelector('.ticket-info p:nth-of-type(1)'));
         });
-        console.log(`[sortTickets] sortedTickets:`, sortedTickets);
-
-        // // 清空列表
-        // const ticketList = document.getElementById('ticketList');
-        // if (ticketList) {
-        //     ticketList.innerHTML = ''; // 清空现有内容
-        //     // 重新渲染排序后的票据
-        //     sortedTickets.forEach(ticket => {
-        //         ticketList.appendChild(ticket);
-        //     });
-        // }
+        console.log('[sortTickets] sortedTickets:', sortedTickets);
+        // 重新渲染
+        ticketList.innerHTML = '';
+        sortedTickets.forEach(ticket => ticketList.appendChild(ticket));
     }
 };
 
