@@ -8,28 +8,59 @@ class Ticket {
     }
 }
 
-// 弹窗动画工具函数
-function showModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        console.log(`[showModal] before:`, modal.className);
-        modal.classList.remove('hidden');
-        // 用 requestAnimationFrame 保证浏览器渲染后再加 show，触发动画
-        requestAnimationFrame(() => {
-            modal.classList.add('show');
-            console.log(`[showModal] after add show:`, modal.className);
-        });
-    }
-}
-function hideModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        console.log(`[hideModal] before:`, modal.className);
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            console.log(`[hideModal] after add hidden:`, modal.className);
-        }, 300);
+// 工具函数模块
+const Utils = {
+    /**
+     * @param {string} modalId - 待显示的弹窗 ID
+     * @description 显示弹窗动画。
+     */
+    showModal: function (modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            console.log(`[showModal] before:`, modal.className);
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                console.log(`[showModal] after add show:`, modal.className);
+            });
+        }
+    },
+
+    /**
+     * @param {string} modalId - 待隐藏的弹窗 ID
+     * @description 隐藏弹窗动画。
+     */
+    hideModal: function (modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            console.log(`[hideModal] before:`, modal.className);
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                console.log(`[hideModal] after add hidden:`, modal.className);
+            }, 300);
+        }
+    },
+
+    /**
+     * @param {HTMLElement} pDateString 
+     * @returns {Date|null} 返回转换后的日期对象或 null
+     * @description 将日期字符串转换为 Date 对象。
+     */
+    convertDate: function (pDateString) {
+
+        const text = pDateString.innerText || '';
+        const matchRegex = /(\d{4})年(\d{1,2})月(\d{1,2})日\s+(\d{1,2}):(\d{1,2})/;
+        const match = text.match(matchRegex);
+        if (match) {
+            const year = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1; // 月份从0开始
+            const day = parseInt(match[3], 10);
+            const hour = parseInt(match[4], 10);
+            const minute = parseInt(match[5], 10);
+            return new Date(year, month, day, hour, minute);
+        }
+        return null; // 如果没有匹配到日期格式，返回 null
     }
 }
 
@@ -70,7 +101,7 @@ const TicketUI = {
         const alertMessage = document.getElementById('alertMessage');
         if (alertBox && alertMessage) {
             alertMessage.textContent = message;
-            showModal('customAlert');
+            Utils.showModal('customAlert');
         }
 
         // 添加关闭按钮事件监听
@@ -89,25 +120,7 @@ const TicketUI = {
      * @description 关闭自定义警告对话框。
      */
     hideMyAlert: function (ticketItem) {
-        hideModal('customAlert');
-        // // 关闭自定义警告对话框
-        // const alertBox = document.getElementById('customAlert');
-        // if (alertBox) {
-        //     alertBox.classList.add('hidden');
-        // }
-
-        // // 移除对应的票据项
-        // if (ticketItem) {
-        //     ticketItem.remove();
-        // }
-
-        // // 移除按钮事件监听
-        // const closeAlertButton = document.getElementById('closeAlert');
-        // if (closeAlertButton && closeAlertButton._closeHandler) {
-        //     closeAlertButton.removeEventListener('click', closeAlertButton._closeHandler);
-        //     delete closeAlertButton._closeHandler; // 清除记录的事件监听器
-        //     console.log('移除了关闭按钮事件监听');
-        // }
+        Utils.hideModal('customAlert');
         setTimeout(() => {
             // 动画结束后再移除票据项
             if (ticketItem) {
@@ -183,13 +196,13 @@ const TicketUI = {
                 <div>${seats}</div>
                 <div>${status}</div>
             `;
-            showModal('ticketDetailModal');
+            Utils.showModal('ticketDetailModal');
         }
         // 绑定关闭按钮
         const closeBtn = document.getElementById('closeDetailModal');
         if (closeBtn) {
             const closeHandler = function () {
-                hideModal('ticketDetailModal');
+                Utils.hideModal('ticketDetailModal');
                 content.innerHTML = '';
                 closeBtn.removeEventListener('click', closeHandler);
             };
@@ -216,7 +229,7 @@ const TicketUI = {
                 <div>${showTime}</div>
                 <div>${seats}</div>
             `;
-            showModal('confirmRefundModal');
+            Utils.showModal('confirmRefundModal');
         }
         // 绑定按钮事件
         const confirmBtn = document.getElementById('confirmRefundBtn');
@@ -226,20 +239,116 @@ const TicketUI = {
         if (cancelBtn._handler) cancelBtn.removeEventListener('click', cancelBtn._handler);
         // 确认退票
         const confirmHandler = () => {
-            hideModal('confirmRefundModal');
+            Utils.hideModal('confirmRefundModal');
             setTimeout(() => {
                 TicketUI.showMyAlert('退票成功！', ticketItem);
             }, 300);
         };
         // 取消退票
         const cancelHandler = () => {
-            hideModal('confirmRefundModal');
+            Utils.hideModal('confirmRefundModal');
         };
         confirmBtn.addEventListener('click', confirmHandler);
         cancelBtn.addEventListener('click', cancelHandler);
         confirmBtn._handler = confirmHandler;
         cancelBtn._handler = cancelHandler;
     },
+
+    /**
+     * @param {HTMLElement} ticketItem - 票据项元素
+     * @description 显示取消预订确认弹窗。
+     */
+    showCancelConfirm: function (ticketItem) {
+        if (!ticketItem) return;
+        const modal = document.getElementById('confirmCancelModal');
+        const content = document.getElementById('confirmCancelContent');
+        if (modal && content) {
+            // 复用详情内容
+            const movieName = ticketItem.querySelector('h3')?.textContent || '';
+            const showTime = ticketItem.querySelector('p:nth-of-type(1)')?.textContent || '';
+            const seats = ticketItem.querySelector('p:nth-of-type(2)')?.textContent || '';
+            const status = ticketItem.querySelector('.ticket-status')?.textContent || '';
+            content.innerHTML = `
+                <div><strong>${movieName}</strong></div>
+                <div>${showTime}</div>
+                <div>${seats}</div>
+            `;
+            Utils.showModal('confirmCancelModal');
+        }
+        // 绑定按钮事件
+        const confirmBtn = document.getElementById('confirmCancelBtn');
+        const cancelBtn = document.getElementById('cancelCancelBtn');
+        // 先解绑，防止多次绑定
+        if (confirmBtn._handler) confirmBtn.removeEventListener('click', confirmBtn._handler);
+        if (cancelBtn._handler) cancelBtn.removeEventListener('click', cancelBtn._handler);
+        // 确认取消
+        const confirmHandler = () => {
+            Utils.hideModal('confirmCancelModal');
+            setTimeout(() => {
+                TicketUI.showMyAlert('取消预订成功！', ticketItem);
+            }, 300);
+        };
+        // 返回
+        const cancelHandler = () => {
+            Utils.hideModal('confirmCancelModal');
+        };
+        confirmBtn.addEventListener('click', confirmHandler);
+        cancelBtn.addEventListener('click', cancelHandler);
+        confirmBtn._handler = confirmHandler;
+        cancelBtn._handler = cancelHandler;
+    },
+
+    /**
+     * @param {HTMLElement} ticketItem - 票据项元素
+     * @description 将票据项转为已付款状态
+     */
+    convertToPaidTicketItem: function (ticketItem) {
+        if (!ticketItem) return;
+        // 修改状态
+        const statusElem = ticketItem.querySelector('.ticket-status');
+        if (statusElem) {
+            statusElem.textContent = '状态: 已付款';
+            statusElem.classList.remove('status-unpaid');
+            statusElem.classList.add('status-paid');
+            statusElem.setAttribute('data-status', 'paid');
+        }
+        // 修改按钮区
+        const btnBox = ticketItem.querySelector('.btn-box');
+        if (btnBox) {
+            btnBox.innerHTML = `
+                <button class="btn-primary info-btn">
+                    <i class="fas fa-info-circle"></i> 查看详情
+                </button>
+                <button class="btn-danger refund-btn">
+                    <i class="fas fa-undo"></i> 退票
+                </button>
+            `;
+        }
+    },
+
+    /**
+     * @param {HTMLElement} tickets - 票据列表元素
+     * @description 对票据列表进行排序，按放映时间升序排列。
+     */
+    sortTickets: function (tickets) {
+
+        // 按放映时间升序排序
+        const sortedTickets = Array.from(tickets).sort((a, b) => {
+            Utils.convertDate(a.querySelector('.ticket-info p:nth-of-type(1)'))
+                - Utils.convertDate(b.querySelector('.ticket-info p:nth-of-type(1)'))
+        });
+        console.log(`[sortTickets] sortedTickets:`, sortedTickets);
+
+        // // 清空列表
+        // const ticketList = document.getElementById('ticketList');
+        // if (ticketList) {
+        //     ticketList.innerHTML = ''; // 清空现有内容
+        //     // 重新渲染排序后的票据
+        //     sortedTickets.forEach(ticket => {
+        //         ticketList.appendChild(ticket);
+        //     });
+        // }
+    }
 };
 
 // 事件处理模块
@@ -270,6 +379,19 @@ const TicketEvents = {
             }
         }
     },
+
+    /**
+     * @param {Event} event - 事件对象
+     * @description 处理取消预订按钮点击事件。
+     */
+    onCancelClick: function (event) {
+        if (event.target.classList.contains('cancel-btn')) { // 检查是否点击了取消预订按钮
+            const ticketItem = event.target.closest('.ticket-item');
+            if (ticketItem) {
+                TicketUI.showCancelConfirm(ticketItem);
+            }
+        }
+    },
 };
 
 // 初始化模块
@@ -282,6 +404,7 @@ const TicketWeb = {
         if (ticketList) {
             ticketList.addEventListener('click', TicketEvents.onRefundClick);
             ticketList.addEventListener('click', TicketEvents.onInfoClick);
+            ticketList.addEventListener('click', TicketEvents.onCancelClick);
         }
 
 
@@ -289,8 +412,10 @@ const TicketWeb = {
         const sampleTicket = new Ticket('添加电影1', '2025年7月21日 19:00', ['B1', 'B2'], 'unpaid');
         TicketUI.renderTicket(sampleTicket);
 
-        const sampleTicket2 = new Ticket('添加电影2', '2025年7月21日 21:00', ['C1', 'C2'], 'paid');
+        const sampleTicket2 = new Ticket('添加电影2', '2025年7月21日 17:00', ['C1', 'C2'], 'paid');
         TicketUI.renderTicket(sampleTicket2);
+
+        TicketUI.sortTickets(ticketList);
     }
 };
 
