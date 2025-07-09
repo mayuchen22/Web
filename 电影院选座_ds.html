@@ -644,18 +644,36 @@
                 let availableCount = 0;
                 let occupiedCount = 0;
                 
+                // 尝试从localStorage加载数据
+                let savedStates = null;
+                try {
+                    const allCinemaData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                    if (allCinemaData && allCinemaData[cinemaConfig.totalSeats]) {
+                        savedStates = allCinemaData[cinemaConfig.totalSeats];
+                    }
+                } catch (e) {
+                    console.error("加载座位状态失败:", e);
+                    savedStates = null;
+                }
+
+                // 循环创建座位
                 for (let row = 0; row < cinemaConfig.rows; row++) {
                     const rowSeats = [];
                     for (let col = 0; col < cinemaConfig.cols; col++) {
-                        // 随机生成一些已售座位（20%）
-                        const state = Math.random() > 0.8 ? SEAT_OCCUPIED : SEAT_AVAILABLE;
+                        let state;
+                        if (savedStates) {
+                            // 如果有已保存的状态，则使用它
+                            state = savedStates[row][col];
+                        } else {
+                            // 否则，随机生成初始的已售座位
+                            state = Math.random() > 0.8 ? SEAT_OCCUPIED : SEAT_AVAILABLE;
+                        }
+                        
                         rowSeats.push({
                             row: row + 1,
                             col: col + 1,
                             state: state,
-                            x: 0,
-                            y: 0,
-                            radius: 0
+                            x: 0, y: 0, radius: 0
                         });
                         
                         if (state === SEAT_AVAILABLE) availableCount++;
@@ -664,6 +682,11 @@
                     seats.push(rowSeats);
                 }
                 
+                // 如果是第一次生成，则保存到localStorage以固定布局
+                if (!savedStates) {
+                    saveSeatState();
+                }
+
                 // 更新统计信息
                 document.getElementById('availableSeats').textContent = availableCount;
                 document.getElementById('soldSeats').textContent = occupiedCount;
@@ -1288,6 +1311,7 @@
                 selectedSeats = [];
                 canSelectSeats = false;
                 updateSelectionInfo();
+                saveSeatState(); // 保存座位状态到localStorage
                 drawCinema();
             }
             
@@ -1314,6 +1338,7 @@
                 updateSelectionInfo();
                 document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i> 退票成功';
                 canSelectSeats = false;
+                saveSeatState(); // 保存座位状态到localStorage
                 drawCinema();
             }
             
@@ -1407,6 +1432,30 @@
                     });
                 });
             }
+
+            const STORAGE_KEY = 'cinemaSeatData_DS';
+            function saveSeatState() {
+                try {
+                    // 1. 读取localStorage中已有的全部数据，如果不存在则创建一个空对象
+                    let allCinemaData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+                    // 2. 创建当前影厅的状态数组 (只保存永久状态，将临时选中的座位视作可选)
+                    const currentSeatStates = seats.map(row => 
+                        row.map(seat => seat.state === SEAT_SELECTED ? SEAT_AVAILABLE : seat.state)
+                    );
+
+                    // 3. 更新当前影厅大小对应的数据
+                    allCinemaData[cinemaConfig.totalSeats] = currentSeatStates;
+
+                    // 4. 将更新后的完整数据写回localStorage
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(allCinemaData));
+                } catch (e) {
+                    console.error("保存座位状态失败:", e);
+                }
+            }
+
+
+
 
             // 绑定按钮事件
             document.getElementById('autoSelectBtn').addEventListener('click', autoSelectSeats);
