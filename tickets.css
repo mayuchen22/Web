@@ -359,6 +359,23 @@ h1 {
     color: #ff8f07;
 }
 
+/* 倒计时样式 */
+.countdown {
+    color: #dc3545;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.countdown.expired {
+    color: #dc3545;
+}
+
+.countdown-timer {
+    font-family: monospace;
+    font-size: 1.05em;
+    color: #ff8f07;
+}
+
 .btn-box {
     display: flex;
     gap: 10px;
@@ -465,6 +482,8 @@ h1 {
     width: 1em;
     margin-left: -1em;
 }
+
+
 
 footer {
     text-align: center;

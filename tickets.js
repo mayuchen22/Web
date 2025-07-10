@@ -5,6 +5,11 @@ class Ticket {
         this.showTime = showTime; // 放映时间
         this.seats = seats; // 座位信息
         this.status = status; // 票状态
+        this.paymentDeadline = this.calculatePaymentDeadline(); //付款截止时间
+    }
+    calculatePaymentDeadline() {
+        const now = new Date();
+        return new Date(now.getTime() + 1 * 60 * 1000); // 1分钟后截止
     }
 }
 
@@ -145,12 +150,19 @@ const TicketUI = {
         if (ticketList) {
             const ticketItem = document.createElement('div');
             ticketItem.className = 'ticket-item';
+            // 添加倒计时HTML
+            const countdownHtml = ticket.status === 'unpaid' ? 
+                `<p class="countdown" data-deadline="${ticket.paymentDeadline.toISOString()}">
+                    <span class="countdown-text" style="color: #ff8f07;">剩余付款时间：</span>
+                    <span class="countdown-timer">1:00</span>
+                </p>` : '';
             ticketItem.innerHTML = `
                 <div class="ticket-info">
                     <h3>电影名称: ${ticket.movieName}</h3>
                     <p>放映时间: ${ticket.showTime}</p>
                     <p>座位: ${ticket.seats.join(', ')}</p>
                     <p class="ticket-status status-${ticket.status}" data-status="${ticket.status}">状态: ${ticket.status === 'unpaid' ? '未付款' : '已付款'}</p>
+                    ${countdownHtml}
                 </div>
                 <div class="btn-box">
                 ${ticket.status === 'unpaid' ?
@@ -171,6 +183,60 @@ const TicketUI = {
                 </div>
             `;
             ticketList.appendChild(ticketItem);
+            // 如果是未付款票据，启动倒计时
+            if (ticket.status === 'unpaid') {
+                this.startCountdown(ticketItem);
+            }
+        }
+    },
+
+    // 倒计时更新方法
+    updateCountdown: function(countdownElement) {
+        const deadline = new Date(countdownElement.dataset.deadline);
+        const now = new Date();
+        const diff = deadline - now;
+
+        if (diff <= 0) {
+            countdownElement.innerHTML = '付款已超时';
+            countdownElement.classList.add('expired');
+            return false; // 停止倒计时
+        }
+
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        const timerElement = countdownElement.querySelector('.countdown-timer');
+        if (timerElement) {
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        return true; // 继续倒计时
+    },
+
+    // 启动倒计时
+    startCountdown: function(ticketItem) {
+        const countdownElement = ticketItem.querySelector('.countdown');
+        if (!countdownElement) return;
+
+        // 立即更新一次
+        const shouldContinue = this.updateCountdown(countdownElement);
+
+        // 设置定时器每秒更新
+        if (shouldContinue) {
+            const countdownInterval = setInterval(() => {
+                const shouldContinue = this.updateCountdown(countdownElement);
+                if (!shouldContinue) {
+                    clearInterval(countdownInterval);
+
+                    // 超时后自动取消预订
+                    setTimeout(() => {
+                        TicketUI.showMyAlert('付款超时，预订已自动取消', ticketItem);
+                    }, 1000);
+                }
+            }, 1000);
+
+            // 将定时器ID存储在元素上以便清理
+            countdownElement._countdownInterval = countdownInterval;
         }
     },
 
@@ -361,6 +427,11 @@ const TicketUI = {
      */
     convertToPaidTicketItem: function (ticketItem) {
         if (!ticketItem) return;
+        // 清除倒计时
+        const countdownElement = ticketItem.querySelector('.countdown');
+        if (countdownElement && countdownElement._countdownInterval) {
+            clearInterval(countdownElement._countdownInterval);
+        }
         // 修改状态
         const statusElem = ticketItem.querySelector('.ticket-status');
         if (statusElem) {
@@ -381,6 +452,13 @@ const TicketUI = {
                 </button>
             `;
         }
+
+            // 移除倒计时显示
+        const countdown = ticketItem.querySelector('.countdown');
+        if (countdown) {
+            countdown.remove();
+        }
+
     },
 
     /**
