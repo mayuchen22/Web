@@ -1135,30 +1135,69 @@
                 // 寻找连续座位
                 let found = false;
                 
-                for (let row = minRow - 1; row < maxRow; row++) {
-                    let consecutive = 0;
-                    let startCol = -1;
+                // 计算中间列位置
+                const middleCol = Math.floor(cinemaConfig.cols / 2);
+
+                // 按排数优先级排序（从中间排开始向两边搜索）
+                const rowOrder = [];
+                const absoluteMiddleRow = Math.floor(cinemaConfig.rows / 2) - 1;
+
+                // 计算实际可用的中间排（确保在允许范围内）
+                const searchStartRow = Math.max(
+                    minRow - 1, 
+                    Math.min(absoluteMiddleRow, maxRow - 1)
+                );
+
+                let left = searchStartRow;   // 向左（前排）指针
+                let right = searchStartRow + 1; // 向右（后排）指针
+
+                while (left >= minRow - 1 || right < maxRow) {
+                    if (left >= minRow - 1) {
+                        rowOrder.push(left);
+                        left--;
+                    }
+                    if (right < maxRow) {
+                        rowOrder.push(right);
+                        right++;
+                    }
+                }
+                
+                for (const row of rowOrder) {
+                    let bestStart = -1;
+                    let minDistance = Infinity;
                     
-                    for (let col = 0; col < cinemaConfig.cols; col++) {
-                        if (seats[row][col].state === SEAT_AVAILABLE) {
-                            consecutive++;
-                            if (consecutive === 1) startCol = col;
-                            
-                            if (consecutive >= groupSize) {
-                                // 找到连续座位
-                                for (let i = 0; i < groupSize; i++) {
-                                    selectSeat(seats[row][startCol + i]);
-                                }
-                                found = true;
-                                document.getElementById('status').innerHTML = `<i class="fas fa-users"></i> 已为${groupSize}人团体选择第${row+1}排连续座位`;
+                    // 检查这一排所有可能的连续座位组
+                    for (let start = 0; start <= cinemaConfig.cols - groupSize; start++) {
+                        let allAvailable = true;
+                        for (let col = start; col < start + groupSize; col++) {
+                            if (seats[row][col].state !== SEAT_AVAILABLE) {
+                                allAvailable = false;
                                 break;
                             }
-                        } else {
-                            consecutive = 0;
+                        }
+                        
+                        if (allAvailable) {
+                            // 计算这组座位的中心位置到屏幕中心的距离
+                            const groupCenter = start + (groupSize - 1) / 2;
+                            const distance = Math.abs(groupCenter - middleCol);
+                            
+                            // 选择距离中心最近的座位组
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                bestStart = start;
+                            }
                         }
                     }
-                    
-                    if (found) break;
+
+                    // 如果找到合适的座位组
+                    if (bestStart !== -1) {
+                        for (let i = 0; i < groupSize; i++) {
+                            selectSeat(seats[row][bestStart + i]);
+                        }
+                        found = true;
+                        document.getElementById('status').innerHTML = `<i class="fas fa-users"></i> 已为${groupSize}人团体选择第${row+1}排连续座位（靠近中间位置）`;
+                        break;
+                    }
                 }
                 
                 if (!found) {
@@ -1355,7 +1394,7 @@
             
             // 监听团体人数改变
             document.getElementById("groupSize").addEventListener("input", function() {
-                handleGroupSizeChange(this.value);  // 触发处理函数并传递当前值
+                handleGroupSizeChange(parseInt(this.value));  // 触发处理函数并传递当前值
             });
 
             // 团体人数输入变化
