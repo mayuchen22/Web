@@ -1,3 +1,13 @@
+// 全局变量，用于存储票据列表
+let ticketList = null;
+class Ticket {
+    constructor(movieName, showTime, seats, status) {
+        this.movieName = movieName; // 电影名称
+        this.showTime = showTime; // 放映时间
+        this.seats = seats; // 座位信息
+        this.status = status; // 票状态
+    }
+}
 class TicketList {
     constructor() {
         this.tickets = []; // 存储所有票据
@@ -47,6 +57,11 @@ class TicketList {
 
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    // 初始化票据列表
+    ticketList = new TicketList();
+    ticketList.pullTickets(); // 从 sessionStorage 中加载票据数据
+
     // 获取Canvas元素和上下文
     const canvas = document.getElementById('cinemaCanvas');
     const ctx = canvas.getContext('2d');
@@ -720,6 +735,10 @@ document.addEventListener('DOMContentLoaded', function () {
             seat.state = SEAT_OCCUPIED; // 已售状态
         });
 
+        // console.log('已售座位:', selectedSeats);
+        const seatsPositions = selectedSeats.map(s => `${s.row}-${s.col}`).join(', ');
+        console.log('已售座位位置:', seatsPositions);
+
         // 更新座位统计
         const soldCount = parseInt(document.getElementById('soldSeats').textContent) + selectedSeats.length;
         const availableCount = parseInt(document.getElementById('availableSeats').textContent) - selectedSeats.length;
@@ -732,6 +751,14 @@ document.addEventListener('DOMContentLoaded', function () {
         canSelectSeats = false;
         updateSelectionInfo();
         drawCinema();
+
+        // ver2: 向list中同步数据
+        const movieName = "默认电影"
+        const showTime = "1900年1月1日 00:00"; // 这里可以替换为实际的电影名称和放映时间
+        const status = 'paid';
+        const ticket = new Ticket(movieName, showTime, seatsPositions, status);
+        console.log('购票信息:', ticket);
+        ticketList.addTicket(ticket);
     }
 
     function refundTickets() {
@@ -758,6 +785,15 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i> 退票成功';
         canSelectSeats = false;
         drawCinema();
+    }
+
+    // 跳转到票夹页面
+    function viewTickets() {
+        // 将票据列表存储到 sessionStorage
+        ticketList.storeTickets();
+        console.log('sessionStorage:', JSON.stringify(sessionStorage));
+        // 跳转到票夹页面
+        window.location.href = 'tickets.html';
     }
 
     // 切换票务类型
@@ -858,6 +894,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // document.getElementById('cancelBtn').addEventListener('click', cancelBooking);
     document.getElementById('buyBtn').addEventListener('click', buyTickets);
     // document.getElementById('refundBtn').addEventListener('click', refundTickets);
+    document.getElementById('viewTicketsBtn').addEventListener('click', viewTickets);
 
     // 初始化
     initializeSeats();

@@ -1,3 +1,6 @@
+// 全局变量
+let ticketList = null; // 全局票据列表实例
+
 // 数据与类封装
 class Ticket {
     constructor(movieName, showTime, seats, status) {
@@ -5,6 +8,53 @@ class Ticket {
         this.showTime = showTime; // 放映时间
         this.seats = seats; // 座位信息
         this.status = status; // 票状态
+    }
+}
+
+class TicketList {
+    constructor() {
+        this.tickets = []; // 存储所有票据
+    }
+
+    /**
+     * @param {Ticket} ticket - 要添加的票据对象
+     * @description 添加一张票据到列表。
+     */
+    addTicket(ticket) {
+        if (ticket instanceof Ticket) {
+            this.tickets.push(ticket);
+        } else {
+            console.error('Invalid ticket object');
+        }
+    }
+
+    /**
+     * @description 将所有的数据存储到浏览器的 sessionStorage 中。
+     */
+    storeTickets() {
+        sessionStorage.setItem('tickets', JSON.stringify(this.tickets));
+        // TODO: 此处或许可以通过改变key值的方式实现不同用户间的票据隔离
+    }
+
+    /**
+     * @description 从 sessionStorage 中获取票据数据并加载到列表中。
+     */
+    pullTickets() {
+        const storedTickets = sessionStorage.getItem('tickets');
+        if (storedTickets) {
+            try {
+                this.tickets = JSON.parse(storedTickets).map(ticketData => new Ticket(
+                    ticketData.movieName,
+                    ticketData.showTime,
+                    ticketData.seats,
+                    ticketData.status
+                ));
+            } catch (error) {
+                console.error('Error parsing tickets from sessionStorage:', error);
+            }
+        } else {
+            this.tickets = []; // 如果没有存储的票据，则初始化为空数组
+        }
     }
 }
 
@@ -149,7 +199,7 @@ const TicketUI = {
                 <div class="ticket-info">
                     <h3>电影名称: ${ticket.movieName}</h3>
                     <p>放映时间: ${ticket.showTime}</p>
-                    <p>座位: ${ticket.seats.join(', ')}</p>
+                    <p>座位: ${ticket.seats}</p>
                     <p class="ticket-status status-${ticket.status}" data-status="${ticket.status}">状态: ${ticket.status === 'unpaid' ? '未付款' : '已付款'}</p>
                 </div>
                 <div class="btn-box">
@@ -396,7 +446,7 @@ const TicketUI = {
             return Utils.convertDate(a.querySelector('.ticket-info p:nth-of-type(1)')) -
                 Utils.convertDate(b.querySelector('.ticket-info p:nth-of-type(1)'));
         });
-        console.log('[sortTickets] sortedTickets:', sortedTickets);
+        // console.log('[sortTickets] sortedTickets:', sortedTickets);
         // 重新渲染
         ticketList.innerHTML = '';
         sortedTickets.forEach(ticket => ticketList.appendChild(ticket));
@@ -483,6 +533,25 @@ const TicketEvents = {
             }
         }
     },
+
+    /**
+     * @param {Event} event - 事件对象
+     * @description 处理返回首页按钮点击事件。
+     */
+    onBackClick: function (event) {
+        console.log('[onBackClick] event:', event);
+        if (event.target.id === 'backToHome') {
+
+            ticketList.storeTickets(); // 存储当前票据列表到 sessionStorage
+
+            console.log('[onBackClick] ticketList:', ticketList);
+
+            console.log('sessionStorage:', JSON.stringify(sessionStorage));
+            // debugger;
+            // 返回首页逻辑
+            window.location.href = 'index.html';
+        }
+    }
 };
 
 // 初始化模块
@@ -491,23 +560,38 @@ const TicketWeb = {
      * @description 初始化票夹页面。
      */
     init: function () {
-        const ticketList = document.getElementById('ticketList');
-        if (ticketList) {
-            ticketList.addEventListener('click', TicketEvents.onRefundClick);
-            ticketList.addEventListener('click', TicketEvents.onInfoClick);
-            ticketList.addEventListener('click', TicketEvents.onPayClick);
-            ticketList.addEventListener('click', TicketEvents.onCancelClick);
+        console.log('sessionStorage:', JSON.stringify(sessionStorage));
+        // debugger;
+
+        const backToHomeButton = document.getElementById('backToHome');
+        // 绑定返回首页按钮事件
+        if (backToHomeButton) {
+            backToHomeButton.addEventListener('click', TicketEvents.onBackClick);
         }
 
+        // 获取票据列表HTML元素
+        const ticketListElem = document.getElementById('ticketList');
+        // 增加按钮事件
+        if (ticketListElem) {
+            ticketListElem.addEventListener('click', TicketEvents.onRefundClick);
+            ticketListElem.addEventListener('click', TicketEvents.onInfoClick);
+            ticketListElem.addEventListener('click', TicketEvents.onPayClick);
+            ticketListElem.addEventListener('click', TicketEvents.onCancelClick);
+        }
 
-        // 示例：添加电影票
-        const sampleTicket = new Ticket('添加电影1', '2025年7月21日 19:00', ['B1', 'B2'], 'unpaid');
-        TicketUI.renderTicket(sampleTicket);
+        // 初始化票据列表
+        ticketList = new TicketList(); // 全局票据列表实例
+        // 从 sessionStorage 中拉取票据数据
+        ticketList.pullTickets();
+        // 渲染所有票据
+        ticketList.tickets.forEach(ticket => {
+            TicketUI.renderTicket(ticket);
+        });
 
-        const sampleTicket2 = new Ticket('添加电影2', '2025年7月21日 17:00', ['C1', 'C2'], 'paid');
-        TicketUI.renderTicket(sampleTicket2);
+        // 示例增加几张票据
+        // TicketUI.renderTicket(new Ticket('电影A', '2023年10月1日 14:30', ['A1', 'A2'], 'unpaid'));
 
-        TicketUI.sortTickets(ticketList);
+        TicketUI.sortTickets(ticketListElem);
     }
 };
 
