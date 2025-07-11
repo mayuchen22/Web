@@ -696,9 +696,19 @@ document.addEventListener('DOMContentLoaded', function () {
             seat.state = SEAT_SELECTED; // 预订状态
         });
 
+        const seatsPositions = selectedSeats.map(s => `${s.row}-${s.col}`).join(', ');
+
         document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i> 座位已成功预订！';
         drawCinema();
         canSelectSeats = false;
+
+        // ver2: 向list中同步数据
+        const movieName = "默认电影"
+        const showTime = "1900年1月1日 00:00"; // 这里可以替换为实际的电影名称和放映时间
+        const status = 'unpaid';
+        const ticket = new Ticket(movieName, showTime, seatsPositions, status);
+        // console.log('预订信息:', ticket);
+        ticketList.addTicket(ticket);
     }
 
     function cancelBooking() {
@@ -737,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // console.log('已售座位:', selectedSeats);
         const seatsPositions = selectedSeats.map(s => `${s.row}-${s.col}`).join(', ');
-        console.log('已售座位位置:', seatsPositions);
+        // console.log('已售座位位置:', seatsPositions);
 
         // 更新座位统计
         const soldCount = parseInt(document.getElementById('soldSeats').textContent) + selectedSeats.length;
@@ -757,7 +767,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const showTime = "1900年1月1日 00:00"; // 这里可以替换为实际的电影名称和放映时间
         const status = 'paid';
         const ticket = new Ticket(movieName, showTime, seatsPositions, status);
-        console.log('购票信息:', ticket);
+        // console.log('购票信息:', ticket);
         ticketList.addTicket(ticket);
     }
 
