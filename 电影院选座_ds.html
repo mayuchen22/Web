@@ -416,6 +416,88 @@
             font-size: 0.9rem;
             border-left: 4px solid #4a6fa5;
         }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: modalopen 0.3s;
+            position: relative;
+        }
+
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        /* 不同类型的弹窗图标颜色 */
+        .modal-warning i {
+            color: #ffc107;
+        }
+
+        .modal-success i {
+            color: #28a745;
+        }
+
+        .modal-info i {
+            color: #17a2b8;
+        }
+
+        .modal-error i {
+            color: #dc3545;
+        }
+
         
         @media (max-width: 768px) {
             .content {
@@ -593,6 +675,24 @@
                         <li>团体中有老年人或少年需遵循上述规则</li>
                     </ul>
                 </div>
+
+                    <!-- 弹窗结构 -->
+                <div id="modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-modal">&times;</span>
+                        <div class="modal-header">
+                            <i id="modal-icon" class="fas fa-info-circle"></i>
+                            <h3 id="modal-title">提示</h3>
+                        </div>
+                        <div class="modal-body">
+                            <p id="modal-message">这里是提示信息内容</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="modal-confirm" class="btn-success">确定</button>
+                        </div>
+                    </div>
+                </div>
+
             </section>
         </div>
         
@@ -603,6 +703,56 @@
     </div>
 
     <script>        
+        // 弹窗控制函数
+        function showModal(type, message, title = '提示') {
+            const modal = document.getElementById('modal');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalContent = document.querySelector('.modal-content');
+
+            // 移除所有类型类
+            modalContent.classList.remove('modal-warning', 'modal-success', 'modal-info', 'modal-error');
+
+            // 设置图标和样式
+            switch(type) {
+                case 'warning':
+                    modalIcon.className = 'fas fa-exclamation-triangle';
+                    modalContent.classList.add('modal-warning');
+                    break;
+                case 'success':
+                    modalIcon.className = 'fas fa-check-circle';
+                    modalContent.classList.add('modal-success');
+                    break;
+                case 'error':
+                    modalIcon.className = 'fas fa-times-circle';
+                    modalContent.classList.add('modal-error');
+                    break;
+                default: // info
+                    modalIcon.className = 'fas fa-info-circle';
+                    modalContent.classList.add('modal-info');
+            }
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+
+            // 关闭弹窗的函数
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+
+            // 绑定关闭事件
+            document.querySelector('.close-modal').onclick = closeModal;
+            document.getElementById('modal-confirm').onclick = closeModal;
+
+            // 点击外部也关闭
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            };
+        }
         document.addEventListener('DOMContentLoaded', function() {            
             // 获取Canvas元素和上下文
             const canvas = document.getElementById('cinemaCanvas');
@@ -817,6 +967,7 @@
                 // 如果不允许选座，直接返回
                 if (!canSelectSeats) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请先点击"手动选座"按钮';
+                    showModal('info', '请先点击"手动选座"按钮');
                     return;
                 }
                 
@@ -833,16 +984,19 @@
                     // 检查年龄限制
                     if (currentAgeRestriction.isChild && seat.row <= 3) {
                         document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 15岁以下观众不能选择前三排座位';
+                        showModal('error', '15岁以下观众不能选择前三排座位');
                         return;
                     }
                     if (currentAgeRestriction.isSenior && seat.row > cinemaConfig.rows - 3) {
                         document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 60岁以上观众不能选择最后三排座位';
+                        showModal('error', '60岁以上观众不能选择最后三排座位');
                         return;
                     }
 
                     // 已售座位不可选择
                     if (seat.state === SEAT_OCCUPIED) {
                         document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 该座位已售出，无法选择';
+                        showModal('warning', '该座位已售出，无法选择');
                         // 更新选座数量
                         document.getElementById('selectedSeats').textContent = selectedSeats.length;
                         return;
@@ -853,6 +1007,8 @@
                         seat.state = SEAT_SELECTED;
                         selectedSeats.push(seat);
                         document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 选座成功';
+                        showModal('success', '选座成功！');
+
                     }
                 }
                 else if(ticketType === 'group'){
@@ -884,14 +1040,17 @@
                         if(selectedSeats.length <= 0){
                             if(seat.row < minRow){
                                 document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 团体中有15岁以下观众，不能选择前三排座位';
+                                showModal('warning', '团体中有15岁以下观众，不能选择前三排座位');
                                 return;
                             }
                             else if(seat.row > maxRow){
-                                document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 60岁以上观众不能选择最后三排座位';
+                                document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 团体中有60岁以上观众，不能选择最后三排座位';
+                                showModal('warning', '团体中有60岁以上观众，不能选择最后三排座位');
                                 return;
                             }
                             else if (seat.state === SEAT_OCCUPIED) {
                                 document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 该座位已售出，无法选择';
+                                showModal('error', '该座位已售出，无法选择');
                                 return;
                             }
                             else if (seat.state === SEAT_AVAILABLE) {
@@ -910,11 +1069,13 @@
                         }
                         else if(seat.row !== selectedSeats[0].row){
                             document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 团体票成员必须选择同一排座位';
+                            showModal('warning', '团体票成员必须选择同一排座位');
                             return;
                         }
                         else{
                             if (seat.state === SEAT_OCCUPIED) {
                                 document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 该座位已售出，无法选择';
+                                showModal('error', '该座位已售出，无法选择');
                                 return;
                             }
                             else if (seat.state === SEAT_AVAILABLE) {
@@ -935,19 +1096,19 @@
                         // 检查年龄限制
                         if (seat.row < minRow) {
                             document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 15岁以下观众不能选择前三排座位';
-                            alert('团体中有15岁以下观众，不能选择前三排座位!');
+                            showModal('warning', '15岁以下观众不能选择前三排座位');
                             return;
                         }
                         if (seat.row > maxRow) {
                             document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 60岁以上观众不能选择最后三排座位';
-                            alert('团体中有60岁以上观众，不能选择最后三排座位!');
+                            showModal('warning', '60岁以上观众不能选择最后三排座位');
                             return;
                         }
 
                         // 已售座位不可选择
                         if (seat.state === SEAT_OCCUPIED) {
                             document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 该座位已售出，无法选择';
-                            alert('该座位已售出，无法选择!');
+                            showModal('error', '该座位已售出，无法选择');
                             // 更新选座数量
                             document.getElementById('selectedSeats').textContent = selectedSeats.length;
                             return;
@@ -958,6 +1119,7 @@
                             seat.state = SEAT_SELECTED;
                             selectedSeats.push(seat);
                             document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 选座成功';
+                            showModal('success', '选座成功');
                         }
                     }
                 }
@@ -1005,6 +1167,7 @@
                 
                 if (!name || !age) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请填写姓名和年龄';
+                    showModal('info', '请填写姓名和年龄');
                     return;
                 }
                 
@@ -1088,6 +1251,7 @@
                 
                 if (!found) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 没有找到符合条件的座位';
+                    showModal('error', '没有找到符合条件的座位');
                 }
                 
                 // 更新选座数量
@@ -1102,6 +1266,7 @@
                 
                 if (groupSize < 2 || groupSize > 20) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 团体人数需在2-20人之间';
+                    showModal('error', '团体人数需在2-20人之间');
                     return;
                 }
                 
@@ -1119,8 +1284,19 @@
                 let hasChild = false;
                 let hasSenior = false;
                 for(let i = 0; i < groupNum; i++){
+                    if (!membersData[i]) {
+                        document.getElementById('status').innerHTML = `<i class="fas fa-exclamation-triangle"></i> 请填写所有成员的姓名和年龄`;
+                        showModal('error', `请填写所有成员的姓名和年龄`);
+                        return;
+                    }
                     let name = membersData[i].name;
                     let age = parseInt(membersData[i].age);
+
+                    if (!name || isNaN(age)) {
+                        document.getElementById('status').innerHTML = `<i class="fas fa-exclamation-triangle"></i> 请填写第${i+1}位成员的姓名和年龄`;
+                        showModal('error', `请填写第${i+1}位成员的姓名和有效年龄`);
+                        return;
+                    }
                     if (membersData[i].isChild){
                         hasChild = true;    
                     }
@@ -1202,6 +1378,7 @@
                 
                 if (!found) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 没有找到符合条件的连续座位';
+                    showModal('error', '没有找到符合条件的连续座位');
                 }
                 
                 // 更新选座数量
@@ -1220,6 +1397,7 @@
                     // 验证姓名和年龄
                     if (!name || isNaN(age) ){
                         document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请先填写有效的姓名和年龄';
+                        showModal('warning', '请先填写有效的姓名和年龄');
                         canSelectSeats = false;
                         return;
                     }
@@ -1249,8 +1427,8 @@
                         let age = parseInt(membersData[i].age);
                         if (!name || isNaN(age) ){
                             document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请先填写有效的姓名和年龄';
-                            canSelectSeats = false;
-                            alert('姓名和年龄不能为空！');     
+                            showModal('warning', '请先填写有效的姓名和年龄');
+                            canSelectSeats = false;     
                             return;
                         }
                     }
@@ -1270,6 +1448,7 @@
             function bookSeats() {
                 if (selectedSeats.length === 0) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请先选择座位';
+                    showModal('warning', '请先选择座位');
                     return;
                 }
                 
@@ -1278,6 +1457,7 @@
                 });
                 
                 document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i> 座位已成功预订！';
+                showModal('success', '座位已成功预订！');
                 drawCinema();
                 canSelectSeats = false;
             }
@@ -1285,6 +1465,7 @@
             function cancelBooking() {
                 if (selectedSeats.length === 0) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请先选择已预订的座位';
+                    showModal('warning', '请先选择已预订的座位');
                     return;
                 }
                 
@@ -1302,6 +1483,7 @@
                 selectedSeats = [];
                 updateSelectionInfo();
                 document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i> 预订已取消';
+                showModal('info', '预订已取消');
                 canSelectSeats = false;
                 drawCinema();
             }
@@ -1309,6 +1491,7 @@
             function buyTickets() {
                 if (selectedSeats.length === 0) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请先选择座位';
+                    showModal('warning', '请先选择座位');
                     return;
                 }
                 
@@ -1324,6 +1507,7 @@
                 document.getElementById('selectedSeats').textContent = '0';
                 
                 document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i> 购票成功！感谢您的购买！';
+                showModal('success', '购票成功！感谢您的购买！');
                 selectedSeats = [];
                 canSelectSeats = false;
                 updateSelectionInfo();
@@ -1333,6 +1517,7 @@
             function refundTickets() {
                 if (selectedSeats.length === 0) {
                     document.getElementById('status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 请先选择已购票的座位';
+                    showModal('warning', '请先选择已购票的座位');
                     return;
                 }
                 
@@ -1352,6 +1537,7 @@
                 selectedSeats = [];
                 updateSelectionInfo();
                 document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i> 退票成功';
+                showModal('success', '退票成功');
                 canSelectSeats = false;
                 drawCinema();
             }
